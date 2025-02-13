@@ -1,0 +1,259 @@
+---
+title: "HW3"
+output: html_document
+date: "2025-02-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+
+## Problem 1
+
+### Theory A
+
+**Claim: Gas stations charge more if they lack direct competition in sight.**
+
+```{r theory 1}
+gas_prices <- read.csv("gasprices.csv")
+
+comp_price_lm <- lm(Price ~ Competitors, data = gas_prices)
+confint(comp_price_lm, level = .95)
+
+ggplot(gas_prices, aes(x = Competitors, y = Price)) +
+  geom_boxplot() +
+  labs(
+    title = "Gas Prices by Competitor Presence"
+  )
+  
+
+```
+
+After calculating the confidence intervals there is no difference between the two. The differences in the two groups (price and competitors) is somewhere between -0.055 and 0.008. This means that we are 95% confident the confidence intervals overlap and there is no difference between the two groups.
+
+### Conclusion:
+
+With 95% confidence, the price difference between gas stations with and without competitors is between -0.0555 and 0.008 percent. The two groups do not vary statistically because 0 is in the interval. The data does not support the theory.
+
+### Theory B
+
+**Theory: The richer the area, the higher the gas prices**
+
+```{r theory b}
+household <- lm(Price ~ Income, data = gas_prices)
+confint(household, level=.95)
+
+ggplot(gas_prices, aes(x = Income, y = Price)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "darkgreen") +
+  labs(title = "Gas Prices vs Median Household Income",
+       x = "Median Household Income by ZIP Code)",
+       y = "Price per Gallon)")
+
+
+```
+
+The shown effect of household income on gas price is between 0.0000006713 and 0.000001853 per dollar of income, with 95% confidence.
+
+### Conclusion:
+
+The confidence interval is completely positive and doesn't have 0 shows that there is a slight correlation between local income and gas prices. With 95% confidence, the impact of zip code income on gas station prices ranges from 0.000000671 to 0.00000183.
+
+### Theory C
+
+**Theory: Gas stations at stoplights charge more.**
+
+```{r theory c}
+stoplights <- lm(Price ~ Stoplight, data = gas_prices)
+confint(stoplights, level=.95)
+
+ggplot(gas_prices, aes(x = Stoplight, y = Price)) +
+  geom_boxplot() +
+  labs(
+    title = "Gas Prices by Stoplight Presence",
+       x = "Stoplight Present (Y  or N)",
+       y = "Price per Gallon")
+
+```
+
+The estimated difference in gas prices between gas stations with a stoplight and those without based on the boxplot and data is between -0.0367 and 0.0301 dollars, with 95% confidence.\
+
+### Conclusion:
+
+There is no statistically significance between the two groups, because the confidence interval of -0.0367 - 0.0301 includes 0. The theory that gas stations at stoplights charge more is not supported by the data.
+
+### Theory D
+
+**Theory: Gas stations with direct highway access charge more.**
+
+```{r theory d}
+highway <- lm(Price ~ Highway, data = gas_prices)
+confint(highway, level=.95)
+
+
+ggplot(gas_prices, aes(x = Highway, y = Price)) +
+  geom_boxplot() +
+  labs(title = "Gas Prices by Highway Access",
+       x = "Highway Access",
+       y = "Price per Gallon")
+
+
+
+```
+
+The estimated difference in gas prices between gas stations with highway access and those without is between 0.00758 and 0.08381 dollars, with 95% confidence.
+
+### Conclusion:
+
+There is a small statistical difference between the two groups, as shown by the confidence interval (0.00758, 0.08381), which is all positive and doesn't include 0. The theory that gas stations with direct access to the roadway charge higher prices is supported by the data.
+
+### Theory E
+
+**Theory: Shell charges more than all other non-Shell brands.**
+
+```{r theory e}
+brand <- lm(Price ~ Brand, data = gas_prices)
+confint(brand, level=.95)
+
+ggplot(gas_prices, aes(x = Brand, y = Price)) +
+  geom_boxplot() +
+  labs(title = "Gas Prices by Brand",
+       x = "Gas Station Brand",
+       y = "Price per Gallon")
+```
+
+The confidence interval for Shell's price difference compared to other brands is between -0.0505 and 0.0493 dollars, with 95 % confidence.
+
+### Conclusion
+
+There is no statistically significant difference between the two groups, as shown by the confidence interval because it has 0. The theory that shell gas stations charge more than non-shell brands is supported by the data.
+
+## Problem 2
+
+### Part A
+
+```{r}
+library(mosaic)
+sclass <- read.csv('sclass.csv')
+
+sclass_filtered <- sclass %>%
+  filter(year==2011 & trim == '63 AMG')
+
+boot_mileage <- do(10000) * mean(~mileage, data = resample(sclass_filtered))
+confint(boot_mileage, level=.95)
+```
+
+**I am 95% confident that the average mileage of 2011 S-Class 63 AMGs has the lower bound and upper bound of 26292 and 31846 miles respectively.**
+
+### Part B
+
+```{r}
+sclass_filtered2 <- sclass %>%
+  filter(year==2014 & trim == '550')
+sclass_filtered2 <- sclass_filtered2 %>%
+  mutate(isBlack = (color== "Black"))
+
+
+boot_black = do(10000) * prop(~isBlack, data =mosaic::resample(sclass_filtered))
+confint(boot_black, level = 0.95)
+```
+
+**I am 95% confident that the proportion of 2011 S-Class 63 AMGs that are black has the lower bound and upper bound of 0.4167 and 0.4527 miles respectively.**
+
+## Problem 3
+
+### Part A
+
+**Question: Is there evidence that one show consistently produces a higher mean Q1_Happy response among viewers?**
+
+**Approach:** Filter the dataset, then take a 95% confidence interval which takes the diffrence in the confidence intervals of the 2 shows.
+
+```{r}
+nbc <- read.csv('nbc_pilotsurvey.csv')
+
+filtered_data <- nbc %>%
+  filter(Show == "Living with Ed" | Show == "My Name is Earl")
+
+happy <- lm(Q1_Happy ~ Show, data = filtered_data)
+confint(happy, level = 0.95)
+```
+
+The confidence interval for the difference in happy scale between the two shows is -0.3988 and 0.1007 with 95% confidence.
+
+### 
+
+Conclusion:
+
+We are 95% confident that there is no statistical proof that one show makes viewers happier than the other because the confidence interval contains 0. Although My Name is Earl's projected happiness score is lower than Living with Ed's, the difference is not statistically significant.
+
+### Part B
+
+**Question: Does the show The Biggest Loser or The Apprentice: Los Angeles make people more annoyed?**
+
+**Approach**: Take a 95% confidence interval from that which takes the difference in the confidence intervals of the 2 shows.
+
+```{r}
+
+filtered_data2 <- nbc %>%
+  filter(Show == "The Biggest Loser" | Show == "The Apprentice: Los Angeles")
+
+annoyed <- lm(Q1_Annoyed ~ Show, data = filtered_data2)
+confint(annoyed, 2, level = .95)
+```
+
+The confidence interval for the difference in happy scale between the two shows is -0.5273 and -0.0147, with 95% certainty.
+
+### Conclusion
+
+We are 95% convinced that there is a statistical difference between the two shows' degrees of annoyance because the confidence interval is entirely negative and does not contain 0. The Apprentice: Los Angeles seems to have a greater mean annoyance rating than The Biggest Loser, based on the negative confidence interval.
+
+### Part C
+
+**Question: Based on a sample of respondents who watched Dancing with the Stars, what proportion of American TV watchers would we expect to report being confused by the show?**
+
+**Approach:** Take a 95% confidence interval from that which takes the difference in the confidence intervals of the 2 shows and how confused by the shows.
+
+```{r}
+filtered_data3 <- nbc %>%
+  filter(Show == "Dancing with the Stars")
+
+
+filtered_data3$ConfusingFlag <- ifelse(filtered_data3$Q2_Confusing >= 4, 1, 0)
+confusing <- lm(ConfusingFlag ~ 1, data = filtered_data3)
+confint(confusing, level = .95)
+```
+
+The confidence interval for the difference in happy scale between the two shows is 0.0380 and 0.1166, with 95% certainty.
+
+### Conclusion:
+
+According to our data, there is a 95% chance that American TV viewers, ranging from 0.038 to 0.117, will answer "4" or higher to the Q2_Confusing Question. We are 95% convinced that the confusing Dancing with the Stars levels have a statistical significance because the confidence interval is positive and does not contain 0.
+
+## Problem 4
+
+**Question:** Does the extra traffic brought to our site from paid search results justify the cost of the ads themselves?
+
+**Approach:** Compute the revenue ratio for each DMA. Fit a linear model to estimate the difference in revenue ratio between treatment and control groups. Make a confidence interval for the difference.
+
+```{r}
+ebay <- read.csv("ebay.csv")
+
+ebay$revenue_ratio <- ebay$rev_after / ebay$rev_before
+
+revenue <- lm(revenue_ratio ~adwords_pause, data =ebay)
+confint(revenue, level = 0.95)
+```
+
+The confidence interval for the difference in adwords pause is -0.0938 and -0.0107 with 95% certainty.
+
+### Conclusion:
+
+According to the data, the advertisements paused group has a lower revenue ratio than the other group. With 95% confidence, the difference in the two groups is between -0.0938 and -0.0107. We are 95% certain that the revenue ratio between the treatment group and control group is statistically significant because 0 is not in the confidence interval and it is negative.\
+
+### 
+
+**\
+**
+
+## 
